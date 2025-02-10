@@ -1,0 +1,58 @@
+name: urban_company_app
+description: A Flutter app for Urban Company services
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  provider: ^6.1.1
+  cached_network_image: ^3.3.0
+  flutter_rating_bar: ^4.0.1
+  intl: ^0.18.1
+  carousel_slider: ^5.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    # Banners
+    - assets/images/banners/banner2.png
+    - assets/images/banners/banner1.jpeg
+    - assets/images/banners/banner3.jpeg
+    - assets/images/banners/banner2.webp
+    - assets/images/banners/banner1.webp
+    - assets/images/banners/banner3.webp
+    
+    # Services
+    - assets/images/services/men_salon.jpeg
+    - assets/images/services/cleaning_banner.jpeg
+    - assets/images/services/repair_banner.jpeg
+    - assets/images/services/msaloon_banner.jpeg
+    - assets/images/services/wsaloon_banner.jpeg
+    - assets/images/services/massage.jpeg
+    
+    # Categories
+    - assets/images/categories/womens_salon.png
+    - assets/images/categories/mens_salon.png
+    - assets/images/categories/ac_appliance.png
+    - assets/images/categories/cleaning.png
+    - assets/images/categories/wall_painting.png
+    - assets/images/categories/electrician_plumber.png
+    
+    # Placeholders
+    - assets/images/placeholders/service_placeholder.png
+    - assets/images/placeholders/profile_placeholder.png
+    
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
