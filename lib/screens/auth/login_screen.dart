@@ -1,4 +1,10 @@
+
+
+
+
 // import 'package:flutter/material.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+// import 'auth_service.dart';
 
 // class LoginScreen extends StatefulWidget {
 //   const LoginScreen({super.key});
@@ -9,8 +15,42 @@
 
 // class _LoginScreenState extends State<LoginScreen> {
 //   final _formKey = GlobalKey<FormState>();
-//   final _phoneController =
-//       TextEditingController(text: '9529567991'); // Set dummy number
+//   final _phoneController = TextEditingController();
+//   final _authService = AuthService();
+//   bool _isLoading = false;
+
+//   @override
+//   void dispose() {
+//     _phoneController.dispose();
+//     super.dispose();
+//   }
+
+//   Future<void> _sendOtp() async {
+//     if (_formKey.currentState!.validate()) {
+//       setState(() => _isLoading = true);
+      
+//       await _authService.verifyPhone(
+//         phoneNumber: _phoneController.text,
+//         onCodeSent: (String verificationId) {
+//           setState(() => _isLoading = false);
+//           Navigator.pushNamed(
+//             context,
+//             '/otp',
+//             arguments: {
+//               'verificationId': verificationId,
+//               'phoneNumber': _phoneController.text,
+//             },
+//           );
+//         },
+//         onError: (String error) {
+//           setState(() => _isLoading = false);
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(content: Text(error)),
+//           );
+//         },
+//       );
+//     }
+//   }
 
 //   @override
 //   Widget build(BuildContext context) {
@@ -43,25 +83,33 @@
 //                     ),
 //                   ),
 //                   validator: (value) {
-//                     if (value == null || value.length != 10) {
-//                       return 'Please enter a valid phone number';
+//                     if (value == null || value.isEmpty) {
+//                       return 'Please enter your phone number';
+//                     }
+//                     if (value.length != 10) {
+//                       return 'Phone number must be 10 digits';
+//                     }
+//                     if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+//                       return 'Please enter valid phone number';
 //                     }
 //                     return null;
 //                   },
 //                 ),
 //                 const SizedBox(height: 24),
 //                 ElevatedButton(
-//                   onPressed: () {
-//                     if (_formKey.currentState!.validate()) {
-//                       Navigator.pushReplacementNamed(
-//                           context, '/home'); // Navigate to Home
-//                     }
-//                   },
+//                   onPressed: _isLoading ? null : _sendOtp,
 //                   style: ElevatedButton.styleFrom(
 //                     padding: const EdgeInsets.symmetric(vertical: 16),
-//                     backgroundColor: Colors.white70,
 //                   ),
-//                   child: const Text('Continue'),
+//                   child: _isLoading
+//                       ? const SizedBox(
+//                           height: 20,
+//                           width: 20,
+//                           child: CircularProgressIndicator(
+//                             strokeWidth: 2,
+//                           ),
+//                         )
+//                       : const Text('Continue'),
 //                 ),
 //               ],
 //             ),
@@ -72,7 +120,12 @@
 //   }
 // }
 
+
+
+
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -83,8 +136,27 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _phoneController =
-      TextEditingController(text: '9529567991'); // Dummy number
+  final _phoneController = TextEditingController();
+  final _authService = AuthService();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _proceedToProfile() async {
+  if (_formKey.currentState!.validate()) {
+    final phoneNumber = _phoneController.text;
+    Navigator.pushReplacementNamed(
+      context,
+      '/profile',
+      arguments: {'phoneNumber': '+91$phoneNumber'},
+    );
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -117,23 +189,34 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   validator: (value) {
-                    if (value == null || value.length != 10) {
-                      return 'Please enter a valid phone number';
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your phone number';
+                    }
+                    if (value.length != 10) {
+                      return 'Phone number must be 10 digits';
+                    }
+                    if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+                      return 'Please enter valid phone number';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.pushReplacementNamed(context, '/otp');
-                    }
-                  },
+                  onPressed: _isLoading ? null : _proceedToProfile,
+
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text('Continue'),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text('Continue'),
                 ),
               ],
             ),

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "245840015967",
+    "project_id": "urban-company-99bbf",
+    "storage_bucket": "urban-company-99bbf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:245840015967:android:49eef4d845eeee9b78e1ea",
+        "android_client_info": {
+          "package_name": "com.example.urban_company_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjGB1YE3ck8ykLazi2Rg-5ATrGDf6_Tsk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
