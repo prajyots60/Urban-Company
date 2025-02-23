@@ -65,7 +65,7 @@ class AuthService {
     });
   }
 
-Future<void> updateUserProfile({
+  Future<void> updateUserProfile({
     required String phone,
     required String name,
     required String email,
@@ -83,46 +83,57 @@ Future<void> updateUserProfile({
     }
   }
 
-Future<Map<String, dynamic>?> getUserProfile() async {
-  final user = _auth.currentUser;
-  if (user != null) {
+  Future<Map<String, dynamic>?> getUserProfile() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      try {
+        final doc = await _firestore.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          return doc.data();
+        } else {
+          print("User document not found");
+        }
+      } catch (e) {
+        print("Error fetching profile: $e");
+      }
+    }
+    return null;
+  }
+
+
+  Future<void> signupUser({required String phoneNumber, required String name, required String email}) async {
     try {
-      final doc = await _firestore.collection('users').doc(user.uid).get();
-      if (doc.exists) {
-        return doc.data();
+      // Create new user in Firestore
+      await _firestore.collection('users').doc(phoneNumber).set({
+        'name': name,
+        'email': email,
+        'phone': phoneNumber,
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Check if user profile exists based on phone number
+  Future<Map<String, dynamic>?> getUserProfileByPhoneNumber(String phoneNumber) async {
+    try {
+      // Normalize phone number (strip country code if necessary)
+      String normalizedPhone = phoneNumber.replaceFirst('+91', '');  // Adjust if needed for your app
+
+      // Query Firestore to find the user document by phone number
+      DocumentSnapshot snapshot = await _firestore.collection('users').doc(normalizedPhone).get();
+
+      if (snapshot.exists) {
+        return snapshot.data() as Map<String, dynamic>;
       } else {
-        print("User document not found");
+        print('No profile found for $normalizedPhone');
+        return null;
       }
     } catch (e) {
-      print("Error fetching profile: $e");
-    }
-  }
-  return null;
-}
-
-
-Future<Map<String, dynamic>?> getUserProfileByPhoneNumber(String phoneNumber) async {
-    // Remove country code if present
-    String normalizedPhone = phoneNumber.replaceAll(RegExp(r'^\+\d{1,3}'), ''); 
-
-    print("🔍 Searching for phone number: $normalizedPhone");
-
-    QuerySnapshot querySnapshot = await _firestore
-        .collection('users')
-        .where('phone', isEqualTo: normalizedPhone)
-        .limit(1)
-        .get();
-
-    if (querySnapshot.docs.isEmpty) {
-      print("❌ No profile found for $normalizedPhone");
+      print('Error fetching user profile: $e');
       return null;
     }
-
-    print("✅ Profile found: ${querySnapshot.docs.first.data()}");
-    return querySnapshot.docs.first.data() as Map<String, dynamic>;
   }
-
-
   Future<void> signOut() async {
     await _auth.signOut();
   }

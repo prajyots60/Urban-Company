@@ -287,11 +287,10 @@
 
 
 
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:urban_company_app/screens/auth/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../auth/auth_service.dart'; // Ensure to import your AuthService
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -306,106 +305,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
+  bool _isLoading = true;
+
   final _authService = AuthService();
-  bool _isLoading = false;
-  bool _isLoadingData = true;
 
   @override
   void initState() {
     super.initState();
+    _loadProfile();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    if (args != null && args['phoneNumber'] != null) {
-      _phoneController.text = args['phoneNumber'];
-      _loadProfile(phoneNumber: args['phoneNumber']);
-    }
-  }
-
-Future<void> _loadProfile({required String phoneNumber}) async {
-  try {
-    setState(() => _isLoadingData = true);
-    
-    String normalizedPhone = phoneNumber.replaceFirst('+91', '');
-
-    final profile = await _authService.getUserProfileByPhoneNumber(normalizedPhone);
-
-    if (profile != null) {
-      print('Profile found: $profile'); // Debugging line
+  Future<void> _loadProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
       setState(() {
-        _nameController.text = profile['name'] ?? '';
-        _emailController.text = profile['email'] ?? '';
-        _addressController.text = profile['address'] ?? '';
+        _isLoading = false;
       });
-    } else {
-      print('No profile found for $normalizedPhone'); // Debugging line
+      // Redirect to login screen if the user is not authenticated
+      Navigator.pushReplacementNamed(context, '/login');
+      return;
     }
-  } catch (e) {
-    print('Error loading profile: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error loading profile: $e')),
-    );
-  } finally {
-    setState(() => _isLoadingData = false);
-  }
-}
-
-
-Future<void> _saveProfile() async {
-  if (_formKey.currentState!.validate()) {
-    setState(() => _isLoading = true);
 
     try {
-      String phoneNumber = _phoneController.text.replaceFirst('+91', ''); // Normalize phone number
+      final userPhone = user.phoneNumber ?? '';
+      final profileData = await _authService.getUserProfileByPhoneNumber(userPhone);
 
-      await _authService.updateUserProfile(
-        phone: phoneNumber, // Ensure phone is included
-        name: _nameController.text,
-        email: _emailController.text,
-        address: _addressController.text,
+      if (profileData != null) {
+        setState(() {
+          _nameController.text = profileData['name'] ?? '';
+          _emailController.text = profileData['email'] ?? '';
+          _addressController.text = profileData['address'] ?? '';
+          _phoneController.text = profileData['phone'] ?? '';
+          _isLoading = false;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No profile found')),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading profile: $e')),
       );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating profile: $e')),
-        );
-      }
-    }
-
-    if (mounted) {
-      setState(() => _isLoading = false);
-    }
-  }
-}
-
-
-  Future<void> _logout() async {
-    try {
-      await _authService.signOut();
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/login');
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error signing out: $e')),
-        );
-      }
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoadingData) {
+    if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
@@ -503,5 +456,52 @@ Future<void> _saveProfile() async {
         ),
       ),
     );
+  }
+
+  Future<void> _saveProfile() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        String phoneNumber = FirebaseAuth.instance.currentUser?.phoneNumber ?? '';
+
+        await FirebaseFirestore.instance.collection('users').doc(phoneNumber).update({
+          'name': _nameController.text,
+          'email': _emailController.text,
+          'address': _addressController.text,
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profile updated successfully')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error updating profile: $e')),
+          );
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushReplacementNamed(context, '/login');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error signing out: $e')),
+      );
+    }
   }
 }

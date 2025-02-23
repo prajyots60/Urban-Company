@@ -1,33 +1,36 @@
 // import 'package:flutter/material.dart';
+// import '../summary_screen.dart';
 
 // class ServiceCard extends StatelessWidget {
 //   final String title;
-//   final String imageUrl;
+//   final String duration;
+//   final String price;
 //   final double rating;
-//   final int reviews;
-//   final double price;
+//   final String reviews;
+//   final String image;
 
-//   const ServiceCard({
-//     super.key,
+//   const ServiceCard({super.key,
 //     required this.title,
-//     required this.imageUrl,
+//     required this.duration,
+//     required this.price,
 //     required this.rating,
 //     required this.reviews,
-//     required this.price,
+//     required this.image,
 //   });
 
 //   @override
 //   Widget build(BuildContext context) {
 //     return Card(
-//       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+//       margin: const EdgeInsets.symmetric(vertical: 8.0),
+//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
 //       child: Padding(
-//         padding: const EdgeInsets.all(12),
+//         padding: const EdgeInsets.all(12.0),
 //         child: Row(
 //           children: [
 //             ClipRRect(
 //               borderRadius: BorderRadius.circular(8),
-//               child: Image.network(
-//                 imageUrl,
+//               child: Image.asset(
+//                 image,
 //                 width: 80,
 //                 height: 80,
 //                 fit: BoxFit.cover,
@@ -45,23 +48,41 @@
 //                       fontWeight: FontWeight.bold,
 //                     ),
 //                   ),
-//                   const SizedBox(height: 4),
+//                   const SizedBox(height: 8),
+//                   Text(duration),
+//                   const SizedBox(height: 8),
+//                   Text(
+//                     price,
+//                     style: const TextStyle(
+//                       fontSize: 14,
+//                       fontWeight: FontWeight.bold,
+//                       color: Colors.green,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 8),
 //                   Row(
 //                     children: [
-//                       const Icon(Icons.star, size: 16, color: Colors.amber),
-//                       Text(' $rating ($reviews reviews)'),
+//                       const Icon(Icons.star, size: 16, color: Colors.orange),
+//                       Text('$rating ($reviews reviews)'),
 //                     ],
-//                   ),
-//                   const SizedBox(height: 4),
-//                   Text(
-//                     '₹$price',
-//                     style: const TextStyle(
-//                       fontSize: 16,
-//                       fontWeight: FontWeight.bold,
-//                     ),
 //                   ),
 //                 ],
 //               ),
+//             ),
+//             ElevatedButton(
+//               onPressed: () {
+//                 Navigator.push(
+//                   context,
+//                   MaterialPageRoute(builder: (context) => const SummaryPage()),
+//                 );
+//               },
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: Colors.purple,
+//                 shape: RoundedRectangleBorder(
+//                   borderRadius: BorderRadius.circular(8),
+//                 ),
+//               ),
+//               child: const Text('Add'),
 //             ),
 //           ],
 //         ),
@@ -81,7 +102,7 @@ class ServiceCard extends StatelessWidget {
   final String reviews;
   final String image;
 
-  const ServiceCard({super.key, 
+  const ServiceCard({
     required this.title,
     required this.duration,
     required this.price,
@@ -93,8 +114,10 @@ class ServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
@@ -141,20 +164,30 @@ class ServiceCard extends StatelessWidget {
                 ],
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SummaryPage()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.deepPurple, Colors.purpleAccent],
                 ),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text('Add'),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white, // White text color
+                  shadowColor: Colors.transparent,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SummaryPage()),
+                  );
+                },
+                child: const Text('Add'),
+              ),
             ),
           ],
         ),
