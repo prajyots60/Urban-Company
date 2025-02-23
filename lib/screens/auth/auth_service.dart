@@ -48,9 +48,10 @@ class AuthService {
       // Check if this is a new user
       if (userCredential.additionalUserInfo?.isNewUser ?? false) {
         await _createUserProfile(userCredential.user!);
+        return true; // New user, navigate to signup
+      } else {
+        return false; // Existing user, navigate to home
       }
-
-      return true;
     } catch (e) {
       onError(e.toString());
       return false;
@@ -101,39 +102,55 @@ class AuthService {
   }
 
 
-  Future<void> signupUser({required String phoneNumber, required String name, required String email}) async {
-    try {
-      // Create new user in Firestore
-      await _firestore.collection('users').doc(phoneNumber).set({
-        'name': name,
-        'email': email,
-        'phone': phoneNumber,
-      });
-    } catch (e) {
-      rethrow;
+ Future<void> signupUser({required String phoneNumber, required String name, required String email}) async {
+  try {
+    // Normalize phone number
+    String normalizedPhone = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+    if (normalizedPhone.length > 10) {
+      normalizedPhone = normalizedPhone.substring(normalizedPhone.length - 10);
     }
+
+    // Trim whitespace from name and email
+    String trimmedName = name.trim();
+    String trimmedEmail = email.trim();
+
+    // Create new user in Firestore
+    await _firestore.collection('users').doc(normalizedPhone).set({
+      'name': trimmedName,
+      'email': trimmedEmail,
+      'phone': normalizedPhone,
+    });
+  } catch (e) {
+    rethrow;
   }
+}
 
   // Check if user profile exists based on phone number
-  Future<Map<String, dynamic>?> getUserProfileByPhoneNumber(String phoneNumber) async {
-    try {
-      // Normalize phone number (strip country code if necessary)
-      String normalizedPhone = phoneNumber.replaceFirst('+91', '');  // Adjust if needed for your app
+ Future<Map<String, dynamic>?> getUserProfileByPhoneNumber(String phoneNumber) async {
+  try {
+    print('Fetching user profile for phone number: $phoneNumber'); // Debug log
+    // Normalize phone number: remove all non-numeric characters and keep the last 10 digits
+    String normalizedPhone = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+    if (normalizedPhone.length > 10) {
+      normalizedPhone = normalizedPhone.substring(normalizedPhone.length - 10);
+    }
+    print('Normalized phone number: $normalizedPhone'); // Debug log
 
-      // Query Firestore to find the user document by phone number
-      DocumentSnapshot snapshot = await _firestore.collection('users').doc(normalizedPhone).get();
+    // Query Firestore to find the user document by phone number
+    DocumentSnapshot snapshot = await _firestore.collection('users').doc(normalizedPhone).get();
+    print('Firestore query result: ${snapshot.exists}'); // Debug log
 
-      if (snapshot.exists) {
-        return snapshot.data() as Map<String, dynamic>;
-      } else {
-        print('No profile found for $normalizedPhone');
-        return null;
-      }
-    } catch (e) {
-      print('Error fetching user profile: $e');
+    if (snapshot.exists) {
+      return snapshot.data() as Map<String, dynamic>;
+    } else {
+      print('No profile found for $normalizedPhone'); // Debug log
       return null;
     }
+  } catch (e) {
+    print('Error fetching user profile: $e'); // Debug log
+    return null;
   }
+}
   Future<void> signOut() async {
     await _auth.signOut();
   }

@@ -172,21 +172,31 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _checkUserExists() async {
+ Future<void> _sendOtp() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       final phoneNumber = _phoneController.text;
 
-      final userProfile =
-          await _authService.getUserProfileByPhoneNumber(phoneNumber);
-      setState(() => _isLoading = false);
-
-      if (userProfile != null) {
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        Navigator.pushReplacementNamed(context, '/signup',
-            arguments: {'phoneNumber': phoneNumber});
-      }
+      await _authService.verifyPhone(
+        phoneNumber: phoneNumber,
+        onCodeSent: (verificationId) {
+          setState(() => _isLoading = false);
+          Navigator.pushNamed(
+            context,
+            '/otp',
+            arguments: {
+              'phoneNumber': phoneNumber,
+              'verificationId': verificationId,
+            },
+          );
+        },
+        onError: (error) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error)),
+          );
+        },
+      );
     }
   }
 
@@ -271,7 +281,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _checkUserExists,
+                    onPressed: _isLoading ? null : _sendOtp,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: Colors.white,

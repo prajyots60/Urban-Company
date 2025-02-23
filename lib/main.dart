@@ -103,6 +103,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '/screens/home_screen.dart';
 import '/screens/auth/login_screen.dart';
 import '/screens/bookings/bookings_screen.dart';
@@ -115,6 +116,7 @@ import '/screens/auth/signup_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  // await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
   runApp(const MyApp());
 }
 

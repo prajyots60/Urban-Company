@@ -111,6 +111,34 @@ class ServiceCard extends StatelessWidget {
     required this.image,
   });
 
+  // Add the date and time picker function here
+  Future<DateTime?> _selectDateTime(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(DateTime.now().year + 1),
+    );
+
+    if (pickedDate != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+
+      if (pickedTime != null) {
+        return DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -179,13 +207,22 @@ class ServiceCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SummaryPage()),
-                  );
-                },
+                onPressed: () async {
+  final DateTime? selectedDateTime = await _selectDateTime(context);
+  if (selectedDateTime != null) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SummaryPage(
+          serviceTitle: title,
+          price: price,
+          image: image,
+          selectedDateTime: selectedDateTime,
+        ),
+      ),
+    );
+  }
+},
                 child: const Text('Add'),
               ),
             ),

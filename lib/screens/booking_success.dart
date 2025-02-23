@@ -40,7 +40,7 @@ class BookingSuccessPage extends StatelessWidget {
 
               // Payment Details
               const Text(
-                'Your payment of ₹500 will be collected at the time of service.',
+                'Your payment will be collected at the time of service.',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
@@ -102,7 +102,7 @@ class BookingSuccessPage extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.popUntil(context, (route) => route.isFirst);
+                    Navigator.pushReplacementNamed(context, '/home');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurple,
