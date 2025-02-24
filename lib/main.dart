@@ -12,6 +12,7 @@ import '/screens/service_details_screen.dart';
 import '/screens/help/help_screen.dart';
 import '/screens/auth/otp_verify.dart';
 import '/screens/auth/signup_screen.dart';
+import './screens/handyman_service_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,6 +79,7 @@ class MyApp extends StatelessWidget {
         '/help': (context) => const HelpScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/service-details': (context) => ServiceDetailsScreen(),
+        '/handyman-services': (context) => HandymanServiceScreen(),
       },
     );
   }
