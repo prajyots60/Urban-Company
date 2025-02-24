@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './widgets/service_category.dart';
 import './widgets/banner_slider.dart';
+import '../screens/auth/auth_service.dart'; 
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,13 +12,43 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final AuthService _authService = AuthService(); // Initialize AuthService
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: _authService.getUserProfile(), // Fetch user profile
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Show a loading indicator while fetching the profile
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (snapshot.hasError || !snapshot.hasData) {
+          // Redirect to signup if the user profile is missing
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushReplacementNamed(context, '/signup');
+          });
+          return const Scaffold(
+            body: Center(
+              child: Text('Redirecting to signup...'),
+            ),
+          );
+        } else {
+          // User profile exists, display the home screen
+          final userProfile = snapshot.data!;
+          return _buildHomeScreen(userProfile);
+        }
+      },
+    );
+  }
+
+  Widget _buildHomeScreen(Map<String, dynamic> userProfile) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Urban Company'),
-        // backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: LayoutBuilder(
@@ -193,7 +224,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-
-
-

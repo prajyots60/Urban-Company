@@ -1,6 +1,3 @@
-
-
-
 import 'package:flutter/material.dart';
 import 'auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,35 +18,26 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isLoading = false;
 
   Future<void> _signup() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-
-      final phoneNumber = ModalRoute.of(context)?.settings.arguments as Map<String, String>;
-      final normalizedPhone = phoneNumber?['phoneNumber'];
-
-      try {
-        await _authService.updateUserProfile(
-          phone: normalizedPhone!,
-          name: _nameController.text,
-          email: _emailController.text,
-          address: _addressController.text,
-        );
-        // Wait for Firebase Auth to complete the sign-in process
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        throw Exception('User not logged in after signup');
-      }
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error signing up: $e')),
-        );
-      } finally {
-        setState(() => _isLoading = false);
-      }
+  if (_formKey.currentState!.validate()) {
+    setState(() => _isLoading = true);
+    try {
+      await _authService.signupUser(
+        name: _nameController.text,
+        email: _emailController.text,
+        address: _addressController.text,
+      );
+      
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      print("Error in signup: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error signing up: $e')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {

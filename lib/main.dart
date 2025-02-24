@@ -1,195 +1,9 @@
-// import 'package:flutter/material.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import '/screens/home_screen.dart';
-// import '/screens/auth/login_screen.dart';
-// import '/screens/bookings/bookings_screen.dart';
-// import '/screens/profile/profile_screen.dart';
-// import '/screens/service_details_screen.dart';
-// import '/screens/help/help_screen.dart';
-// import '/screens/auth/otp_verify.dart';
-// import '/screens/auth/signup_screen.dart';
-
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await Firebase.initializeApp();
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Urban Company',
-//       theme: ThemeData(
-//         colorScheme: ColorScheme.fromSeed(
-//           seedColor: Colors.deepPurple,
-//           primary: Colors.deepPurple,
-//           secondary: Colors.orangeAccent,
-//         ),
-//         scaffoldBackgroundColor: Colors.grey[50],
-//         fontFamily: 'Poppins',
-//         textTheme: GoogleFonts.poppinsTextTheme(),
-//         appBarTheme: const AppBarTheme(
-//           backgroundColor: Colors.white,
-//           elevation: 0,
-//           iconTheme: IconThemeData(color: Colors.black),
-//           titleTextStyle: TextStyle(
-//             color: Colors.black,
-//             fontSize: 18,
-//             fontWeight: FontWeight.w600,
-//             fontFamily: 'Poppins',
-//           ),
-//         ),
-//         elevatedButtonTheme: ElevatedButtonThemeData(
-//           style: ElevatedButton.styleFrom(
-//             backgroundColor: Colors.deepPurple, // Button background color
-//             foregroundColor: Colors.white, // Text color
-//             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-//             shape: RoundedRectangleBorder(
-//               borderRadius: BorderRadius.circular(8),
-//             ),
-//           ),
-//         ),
-//       ),
-//       darkTheme: ThemeData.dark().copyWith(
-//         colorScheme: ColorScheme.dark(
-//           primary: Colors.deepPurple,
-//           secondary: Colors.orangeAccent,
-//         ),
-//         cardTheme: CardTheme(
-//           color: Colors.grey[900],
-//           elevation: 4,
-//           shape: RoundedRectangleBorder(
-//             borderRadius: BorderRadius.circular(12),
-//           ),
-//         ),
-//         textTheme: GoogleFonts.poppinsTextTheme().apply(
-//           bodyColor: Colors.white, // Default text color
-//           displayColor: Colors.white, // Headings and titles
-//         ),
-//       ),
-//       // themeMode: ThemeMode.system,
-//       initialRoute: '/',
-//       routes: {
-//         '/': (context) => const LoginScreen(),
-//         '/signup': (context) => const SignupScreen(),
-//         '/otp': (context) {
-//           final args = ModalRoute.of(context)?.settings.arguments;
-
-//           if (args is Map<String, String>) {
-//             return OtpVerificationScreen(
-//               phoneNumber: args['phoneNumber'] ?? '',
-//               verificationId: args['verificationId'] ?? '',
-//             );
-//           } else {
-//             return const Scaffold(
-//               body: Center(child: Text('Invalid arguments for OTP screen')),
-//             );
-//           }
-//         },
-//         '/home': (context) => const HomeScreen(),
-//         '/bookings': (context) => const BookingsScreen(),
-//         '/help': (context) => const HelpScreen(),
-//         '/profile': (context) => const ProfileScreen(),
-//         '/service-details': (context) => ServiceDetailsScreen(),
-//       },
-//     );
-//   }
-// }
-
-// import 'package:flutter/material.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import '/screens/home_screen.dart';
-// import '/screens/auth/login_screen.dart';
-// import '/screens/bookings/bookings_screen.dart';
-// import '/screens/profile/profile_screen.dart';
-// import '/screens/service_details_screen.dart';
-// import '/screens/help/help_screen.dart';
-// import '/screens/auth/otp_verify.dart';
-// import '/screens/auth/signup_screen.dart';
-
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await Firebase.initializeApp();
-//   // await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Urban Company',
-//       theme: ThemeData(
-//         colorScheme: ColorScheme.light(
-//           primary: Colors.deepPurple,
-//           secondary: Colors.orangeAccent,
-//         ),
-//         scaffoldBackgroundColor: Colors.grey[50],
-//         fontFamily: 'Poppins',
-//         textTheme: GoogleFonts.poppinsTextTheme(),
-//         appBarTheme: AppBarTheme(
-//           backgroundColor: Colors.deepPurple[50],
-//           elevation: 2,
-//           iconTheme: const IconThemeData(color: Colors.deepPurple),
-//           titleTextStyle: GoogleFonts.poppins(
-//             color: Colors.deepPurple,
-//             fontSize: 18,
-//             fontWeight: FontWeight.w600,
-//           ),
-//         ),
-//         elevatedButtonTheme: ElevatedButtonThemeData(
-//           style: ElevatedButton.styleFrom(
-//             backgroundColor: Colors.deepPurple, // Button background color
-//             foregroundColor: Colors.white, // Text color
-//             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-//             shape: RoundedRectangleBorder(
-//               borderRadius: BorderRadius.circular(8),
-//             ),
-//           ),
-//         ),
-//       ),
-//       initialRoute: '/',
-//       routes: {
-//         '/': (context) => const LoginScreen(),
-//         '/signup': (context) => const SignupScreen(),
-//         '/otp': (context) {
-//           final args = ModalRoute.of(context)?.settings.arguments;
-
-//           if (args is Map<String, String>) {
-//             return OtpVerificationScreen(
-//               phoneNumber: args['phoneNumber'] ?? '',
-//               verificationId: args['verificationId'] ?? '',
-//             );
-//           } else {
-//             return const Scaffold(
-//               body: Center(child: Text('Invalid arguments for OTP screen')),
-//             );
-//           }
-//         },
-//         '/home': (context) => const HomeScreen(),
-//         '/bookings': (context) => const BookingsScreen(),
-//         '/help': (context) => const HelpScreen(),
-//         '/profile': (context) => const ProfileScreen(),
-//         '/service-details': (context) => ServiceDetailsScreen(),
-//       },
-//     );
-//   }
-// }
-
-
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '/screens/home_screen.dart';
 import '/screens/auth/login_screen.dart';
 import '/screens/bookings/bookings_screen.dart';
@@ -276,21 +90,58 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+      builder: (context, authSnapshot) {
+        if (authSnapshot.connectionState == ConnectionState.waiting) {
           // Show a loading indicator while checking auth state
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
+        } else if (authSnapshot.hasData) {
+          // User is authenticated, check if they have a profile in Firestore
+          return FutureBuilder<Map<String, dynamic>?>(
+            future: _checkUserProfile(authSnapshot.data!),
+            builder: (context, profileSnapshot) {
+              if (profileSnapshot.connectionState == ConnectionState.waiting) {
+                // Show a loading indicator while checking Firestore
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              } else if (profileSnapshot.hasError || !profileSnapshot.hasData) {
+                // User is authenticated but has no profile, redirect to signup
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.pushReplacementNamed(context, '/login');
+                });
+                return const Scaffold(
+                  body: Center(child: Text('Redirecting to login...')),
+                );
+              } else {
+                // User is authenticated and has a profile, navigate to home
+                return const HomeScreen();
+              }
+            },
+          );
         } else {
-          // If the user is logged in, navigate to the home screen
-          if (snapshot.hasData) {
-            return const HomeScreen();
-          }
-          // If the user is not logged in, navigate to the login screen
+          // User is not authenticated, navigate to login
           return const LoginScreen();
         }
       },
     );
+  }
+
+  Future<Map<String, dynamic>?> _checkUserProfile(User user) async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (doc.exists) {
+        return doc.data();
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print("Error checking user profile: $e");
+      return null;
+    }
   }
 }

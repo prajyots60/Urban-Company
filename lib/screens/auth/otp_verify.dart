@@ -22,46 +22,47 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final AuthService _authService = AuthService();
 
   Future<void> _validateOtp() async {
-    final otp = _otpValues.join();
+  final otp = _otpValues.join();
 
-    if (otp.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter all 6 digits of the OTP')),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    final result = await _authService.verifyOTP(
-      verificationId: widget.verificationId,
-      otp: otp,
-      onError: (error) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error)),
-        );
-      },
+  if (otp.length < 6) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please enter all 6 digits of the OTP')),
     );
+    return;
+  }
 
-    setState(() => _isLoading = false);
+  setState(() => _isLoading = true);
 
-    if (result) {
-      // New user, navigate to signup
-      Navigator.pushReplacementNamed(
-        context,
-        '/signup',
-        arguments: {'phoneNumber': widget.phoneNumber},
+  final isNewUser = await _authService.verifyOTP(
+    verificationId: widget.verificationId,
+    otp: otp,
+    onError: (error) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error)),
       );
-    } else {
-      // Existing user, navigate to home
-      Navigator.pushNamedAndRemoveUntil(
+    },
+  );
+
+  setState(() => _isLoading = false);
+
+  print('isNewUser: $isNewUser');
+
+  if (isNewUser) {
+    // New user, navigate to signup
+    Navigator.pushReplacementNamed(
+      context,
+      '/signup',
+    );
+  } else {
+    // Existing user, navigate to home
+    Navigator.pushNamedAndRemoveUntil(
       context,
       '/home',
-      (route) => false, // This removes all routes from the stack
+      (route) => false,
     );
-    }
   }
+}
 
   @override
   Widget build(BuildContext context) {
