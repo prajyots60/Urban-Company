@@ -66,23 +66,32 @@ class AuthService {
     });
   }
 
-  Future<void> updateUserProfile({
-    required String phone,
-    required String name,
-    required String email,
-    required String address,
-  }) async {
-    try {
-      await _firestore.collection('users').doc(phone).set({
-        'phone': phone,
-        'name': name,
-        'email': email,
-        'address': address,
-      }, SetOptions(merge: true)); // Merge ensures updates don't overwrite existing fields
-    } catch (e) {
-      throw Exception('Error saving profile: $e');
-    }
-  }
+  // Future<void> updateUserProfile({
+  //   required String phone,
+  //   required String name,
+  //   required String email,
+  //   required String address,
+  // }) async {
+  //   try {
+  //     final user = FirebaseAuth.instance.currentUser;
+  //     if (user == null) {
+  //       throw Exception('User not logged in');
+  //     }
+
+  //     await FirebaseFirestore.instance.collection('users').doc(phone).set(
+  //         {
+  //           'phone': phone,
+  //           'name': name,
+  //           'email': email,
+  //           'address': address,
+  //         },
+  //         SetOptions(
+  //             merge:
+  //                 true)); // Merge ensures updates don't overwrite existing fields
+  //   } catch (e) {
+  //     throw Exception('Error saving profile: $e');
+  //   }
+  // }
 
   Future<Map<String, dynamic>?> getUserProfile() async {
     final user = _auth.currentUser;
@@ -101,56 +110,157 @@ class AuthService {
     return null;
   }
 
-
- Future<void> signupUser({required String phoneNumber, required String name, required String email}) async {
-  try {
-    // Normalize phone number
+  // Normalize phone number
+  String _normalizePhoneNumber(String phoneNumber) {
     String normalizedPhone = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
     if (normalizedPhone.length > 10) {
       normalizedPhone = normalizedPhone.substring(normalizedPhone.length - 10);
     }
-
-    // Trim whitespace from name and email
-    String trimmedName = name.trim();
-    String trimmedEmail = email.trim();
-
-    // Create new user in Firestore
-    await _firestore.collection('users').doc(normalizedPhone).set({
-      'name': trimmedName,
-      'email': trimmedEmail,
-      'phone': normalizedPhone,
-    });
-  } catch (e) {
-    rethrow;
+    return normalizedPhone;
   }
-}
 
-  // Check if user profile exists based on phone number
- Future<Map<String, dynamic>?> getUserProfileByPhoneNumber(String phoneNumber) async {
-  try {
-    print('Fetching user profile for phone number: $phoneNumber'); // Debug log
-    // Normalize phone number: remove all non-numeric characters and keep the last 10 digits
-    String normalizedPhone = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
-    if (normalizedPhone.length > 10) {
-      normalizedPhone = normalizedPhone.substring(normalizedPhone.length - 10);
+  Future<void> signupUser({
+    required String phoneNumber,
+    required String name,
+    required String email,
+  }) async {
+    try {
+      // Normalize phone number
+      String normalizedPhone = _normalizePhoneNumber(phoneNumber);
+
+      // Get the current authenticated user
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('User is not authenticated');
+      }
+
+      // Create new user in Firestore
+      await _firestore.collection('users').doc(normalizedPhone).set({
+        'uid': user.uid, // Store the authenticated user's UID
+        'phone': normalizedPhone,
+        'name': name.trim(),
+        'email': email.trim(),
+      });
+    } catch (e) {
+      rethrow;
     }
-    print('Normalized phone number: $normalizedPhone'); // Debug log
+  }
 
-    // Query Firestore to find the user document by phone number
-    DocumentSnapshot snapshot = await _firestore.collection('users').doc(normalizedPhone).get();
-    print('Firestore query result: ${snapshot.exists}'); // Debug log
+  Future<void> updateUserProfile({
+    required String phone,
+    required String name,
+    required String email,
+    required String address,
+  }) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
 
-    if (snapshot.exists) {
-      return snapshot.data() as Map<String, dynamic>;
-    } else {
-      print('No profile found for $normalizedPhone'); // Debug log
+      // Normalize phone number
+      String normalizedPhone = _normalizePhoneNumber(phone);
+
+      // Update user profile in Firestore
+      await _firestore.collection('users').doc(normalizedPhone).set(
+        {
+          'phone': normalizedPhone,
+          'name': name,
+          'email': email,
+          'address': address,
+        },
+        SetOptions(
+            merge:
+                true), // Merge ensures updates don't overwrite existing fields
+      );
+    } catch (e) {
+      throw Exception('Error saving profile: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserProfileByPhoneNumber(
+      String phoneNumber) async {
+    try {
+      // Normalize phone number
+      String normalizedPhone = _normalizePhoneNumber(phoneNumber);
+
+      // Query Firestore to find the user document by phone number
+      DocumentSnapshot snapshot =
+          await _firestore.collection('users').doc(normalizedPhone).get();
+
+      if (snapshot.exists) {
+        return snapshot.data() as Map<String, dynamic>;
+      } else {
+        print('No profile found for $normalizedPhone');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching user profile: $e');
       return null;
     }
-  } catch (e) {
-    print('Error fetching user profile: $e'); // Debug log
-    return null;
   }
-}
+
+  // Future<void> signupUser(
+  //     {required String phoneNumber,
+  //     required String name,
+  //     required String email}) async {
+  //   try {
+  //     // Normalize phone number
+  //     String normalizedPhone = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+  //     if (normalizedPhone.length > 10) {
+  //       normalizedPhone =
+  //           normalizedPhone.substring(normalizedPhone.length - 10);
+  //     }
+
+  //     // Get the current authenticated user
+  //     final user = _auth.currentUser;
+  //     if (user == null) {
+  //       throw Exception('User is not authenticated');
+  //     }
+
+  //     // Create new user in Firestore
+  //     await _firestore.collection('users').doc(normalizedPhone).set({
+  //       'uid': user.uid, // Store the authenticated user's UID
+  //       'phone': normalizedPhone,
+  //       'name': name.trim(),
+  //       'email': email.trim(),
+  //     });
+  //   } catch (e) {
+  //     rethrow;
+  //   }
+  // }
+
+  // Check if user profile exists based on phone number
+  // Future<Map<String, dynamic>?> getUserProfileByPhoneNumber(
+  //     String phoneNumber) async {
+  //   try {
+  //     print(
+  //         'Fetching user profile for phone number: $phoneNumber'); // Debug log
+  //     // Normalize phone number: remove all non-numeric characters and keep the last 10 digits
+  //     String normalizedPhone = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+  //     if (normalizedPhone.length > 10) {
+  //       normalizedPhone =
+  //           normalizedPhone.substring(normalizedPhone.length - 10);
+  //     }
+  //     print('Normalized phone number: $normalizedPhone'); // Debug log
+
+  //     // Query Firestore to find the user document by phone number
+  //     DocumentSnapshot snapshot =
+  //         await _firestore.collection('users').doc(normalizedPhone).get();
+  //     print('Firestore query result: ${snapshot.exists}'); // Debug log
+
+  //     if (snapshot.exists) {
+  //       return snapshot.data() as Map<String, dynamic>;
+  //     } else {
+  //       print('No profile found for $normalizedPhone'); // Debug log
+  //       return null;
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching user profile: $e'); // Debug log
+  //     return null;
+  //   }
+  // }
+
   Future<void> signOut() async {
     await _auth.signOut();
   }

@@ -55,7 +55,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       );
     } else {
       // Existing user, navigate to home
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/home',
+      (route) => false, // This removes all routes from the stack
+    );
     }
   }
 
