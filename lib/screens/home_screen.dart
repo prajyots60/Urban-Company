@@ -16,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>?> (
+    return FutureBuilder<Map<String, dynamic>?>(
       future: _authService.getUserProfile(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -49,16 +49,30 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const BannerSlider(),
+            // Handyman Card
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/handyman-services');
                 },
-                child: Card(
-                  color: Colors.deepPurple[50],
-                  elevation: 5,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.deepPurple, Colors.purpleAccent],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.deepPurple.withOpacity(0.3),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
@@ -72,13 +86,24 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
                             ),
                             SizedBox(height: 8),
-                            Text('Get quick fixes for your home!'),
+                            Text(
+                              'Quick fixes for your home!',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white70,
+                              ),
+                            ),
                           ],
                         ),
-                        const Icon(Icons.arrow_forward, size: 30, color: Colors.deepPurple),
+                        const Icon(
+                          Icons.arrow_forward,
+                          size: 30,
+                          color: Colors.white,
+                        ),
                       ],
                     ),
                   ),
@@ -92,12 +117,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: InputDecoration(
                   hintText: 'Search for services...',
                   prefixIcon: const Icon(Icons.search),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      _searchController.clear();
-                    },
-                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -146,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                   ),
-                   ServiceCategory(
+                  ServiceCategory(
                     title: 'AC & Appliance Repair',
                     image: 'assets/images/categories/ac_appliance.png',
                     onTapCallback: () {
