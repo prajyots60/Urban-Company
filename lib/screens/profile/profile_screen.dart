@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../auth/auth_service.dart'; // Ensure to import your AuthService
+import '../auth/auth_service.dart';
+import 'package:intl/intl.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -19,18 +20,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = true;
 
   final _authService = AuthService();
-  String _normalizePhoneNumber(String phoneNumber) {
-    String normalizedPhone = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
-    if (normalizedPhone.length > 10) {
-      normalizedPhone = normalizedPhone.substring(normalizedPhone.length - 10);
-    }
-    return normalizedPhone;
-  }
 
   @override
   void initState() {
     super.initState();
     _loadProfile();
+  }
+
+  String _formatDate(String timestamp) {
+    try {
+      final date = DateTime.parse(timestamp);
+      return DateFormat('yyyy-MM-dd')
+          .format(date); // Formats date as YYYY-MM-DD
+    } catch (e) {
+      return 'Invalid date';
+    }
   }
 
   Future<void> _loadProfile() async {
@@ -77,6 +81,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _cancelSubscription(BuildContext context, String subscriptionId) async {
+    await FirebaseFirestore.instance
+        .collection('user_subscriptions')
+        .doc(subscriptionId)
+        .update({'status': 'cancelled'});
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Subscription cancelled.')),
+    );
+    setState(() {}); // Refresh the UI
+  }
+
+  String _normalizePhoneNumber(String phoneNumber) {
+    String normalizedPhone = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+    if (normalizedPhone.length > 10) {
+      normalizedPhone = normalizedPhone.substring(normalizedPhone.length - 10);
+    }
+    return normalizedPhone;
   }
 
   @override
@@ -212,6 +236,138 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 24),
+            ExpansionTile(
+              title: const Text(
+                'My Subscriptions',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              initiallyExpanded: true,
+              children: [
+                FutureBuilder<QuerySnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('user_subscriptions')
+                      .where('userId',
+                          isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                      .get(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData ||
+                        snapshot.data!.docs.isEmpty) {
+                      return const Center(
+                          child: Text('No active subscriptions.'));
+                    } else {
+                      final subscriptions = snapshot.data!.docs;
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: subscriptions.length,
+                        itemBuilder: (context, index) {
+                          final subscription = subscriptions[index].data()
+                              as Map<String, dynamic>;
+                          return Card(
+                            elevation: 4,
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.assignment,
+                                          color: Colors.deepPurple),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          subscription['serviceDetails']
+                                              ['title'],
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.calendar_today,
+                                          size: 16, color: Colors.blue),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Next Delivery: ${_formatDate(subscription['nextDelivery'])}',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.star,
+                                          size: 16, color: Colors.orange),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Status: ${subscription['status']}',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color:
+                                              subscription['status'] == 'active'
+                                                  ? Colors.green
+                                                  : Colors.red,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        _cancelSubscription(
+                                            context, subscriptions[index].id);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16, vertical: 8),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'Cancel',
+                                        style: TextStyle(
+                                            fontSize: 14, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -274,5 +430,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 }
-
-
