@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -50,8 +49,8 @@ class MyApp extends StatelessWidget {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepPurple, // Button background color
-            foregroundColor: Colors.white, // Text color
+            backgroundColor: Colors.deepPurple, 
+            foregroundColor: Colors.white, 
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -59,7 +58,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: AuthWrapper(), // Use AuthWrapper to handle authentication state
+      home: AuthWrapper(), 
       routes: {
         '/signup': (context) => const SignupScreen(),
         '/otp': (context) {
@@ -97,22 +96,18 @@ class AuthWrapper extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, authSnapshot) {
         if (authSnapshot.connectionState == ConnectionState.waiting) {
-          // Show a loading indicator while checking auth state
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         } else if (authSnapshot.hasData) {
-          // User is authenticated, check if they have a profile in Firestore
           return FutureBuilder<Map<String, dynamic>?>(
             future: _checkUserProfile(authSnapshot.data!),
             builder: (context, profileSnapshot) {
               if (profileSnapshot.connectionState == ConnectionState.waiting) {
-                // Show a loading indicator while checking Firestore
                 return const Scaffold(
                   body: Center(child: CircularProgressIndicator()),
                 );
               } else if (profileSnapshot.hasError || !profileSnapshot.hasData) {
-                // User is authenticated but has no profile, redirect to signup
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   Navigator.pushReplacementNamed(context, '/login');
                 });
@@ -120,13 +115,11 @@ class AuthWrapper extends StatelessWidget {
                   body: Center(child: Text('Redirecting to login...')),
                 );
               } else {
-                // User is authenticated and has a profile, navigate to home
                 return const HomeScreen();
               }
             },
           );
         } else {
-          // User is not authenticated, navigate to login
           return const LoginScreen();
         }
       },
